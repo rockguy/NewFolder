@@ -127,11 +127,19 @@ function NotesViewModel() {
      */
     self.saveNote = function () {
         //Получаем объект Note из observable полей формы
-        var note = null; //todo, использовать self.id() и др.
+        var note = new Note();
+
+
+        note.id = self.id();
+        note.name = self.name();
+        note.cellPhone=self.cellPhone();
+        note.homePhone=self.homePhone();
+
+        //todo, использовать self.id() и др.
         for (i=0;i<10000;i++){
         console.log("я сохраняю");}
         //Преобразовываем в json-строку с помощью функции ko.toJSON
-        var jsonData = null; //todo
+        var jsonData = ko.toJSON(note); //todo
         console.log(jsonData);
 
         //уведомляем сервер  с помощью JavaScript объекта, позволяющего осуществить AJAX к контролеру
@@ -144,16 +152,19 @@ function NotesViewModel() {
                 console.log(data);
 
                 //обновляем данные локально
-                var isNew = true; //todo флаг, является ли данная запись в форме - новой записью. Если редактируемая - выдает false
+                var isNew = !(self.notes.find.byId(data.id)); //todo флаг, является ли данная запись в форме - новой записью. Если редактируемая - выдает false
                 if (isNew) { /*создание нового */
                     //todo добавляем в массив записей. Не забываем передать объекту полученный от сервера id
+                    self.notes.push(new Note(data.id, data.name, data.homePhone, data.cellPhone));
                 } else {
                     //todo редактирование - ищем и обновляем
                     console.log(self.notes());
                     for (i = 0; i < self.notes().length; i++) {
-                        var found = false; //todo исправить на корректное условие
+                        var found = self.notes()[i].id===data.id; //todo исправить на корректное условие
                         if (found) {
                             self.notes()[i].name(data.name);
+                            self.notes()[i].cellPhone(data.cellPhone);
+                            self.notes()[i].homePhone(data.homePhone);
                             //todo обновить аналогично остальные поля.
 
                             console.log(self.notes()[i]);
