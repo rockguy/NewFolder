@@ -120,7 +120,7 @@ public class Application extends Controller {
             note.delete();
 
             //возвращаем в формате JSON результат (используем переменную result)
-            return TODO;
+            return ok(result);
         }
     }
 

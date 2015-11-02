@@ -16,7 +16,7 @@ function NotesViewModel() {
 
     // Поля формы
     //+todo сделать поля observable
-    self.id = null;
+    self.id = ko.observable(null);
     self.name = ko.observable("");
     self.cellPhone = ko.observable("");
     self.homePhone = ko.observable("");
@@ -88,9 +88,9 @@ function NotesViewModel() {
         console.log(note);
         //?todo
         self.id(note.id);
-        self.name(note.name);
-        self.cellPhone(note.cellPhone);
-        self.homePhone(note.homePhone);
+        self.name(note.name());
+        self.cellPhone(note.cellPhone());
+        self.homePhone(note.homePhone());
     };
 
     /**
@@ -109,13 +109,16 @@ function NotesViewModel() {
             dataType: 'json',
             contentType: 'application/json; charset=utf-8',
             data: jsonData,
-            success: function () {
+            success: function (note) {
                 console.log("Успешно обработан ajax запрос. Запись удалена");
                 //?todo
                 for (i = 0; i < self.notes().length; i++) {
                     if(self.notes()[i].id===note.id){
                         console.log("found id"+note.id);
-                        notes.remove(i);
+                        self.notes.remove(self.notes()[i]);
+                        console.log(self.notes());
+                        console.log(self.notes().length);
+
                         break;
                     }
                 }
@@ -136,8 +139,8 @@ function NotesViewModel() {
         note.homePhone=self.homePhone();
 
         //todo, использовать self.id() и др.
-        for (i=0;i<10000;i++){
-        console.log("я сохраняю");}
+
+
         //Преобразовываем в json-строку с помощью функции ko.toJSON
         var jsonData = ko.toJSON(note); //todo
         console.log(jsonData);
@@ -152,10 +155,11 @@ function NotesViewModel() {
                 console.log(data);
 
                 //обновляем данные локально
-                var isNew = !(self.notes.find.byId(data.id)); //todo флаг, является ли данная запись в форме - новой записью. Если редактируемая - выдает false
+                var isNew = note.id===null; //todo флаг, является ли данная запись в форме - новой записью. Если редактируемая - выдает false
                 if (isNew) { /*создание нового */
                     //todo добавляем в массив записей. Не забываем передать объекту полученный от сервера id
                     self.notes.push(new Note(data.id, data.name, data.homePhone, data.cellPhone));
+
                 } else {
                     //todo редактирование - ищем и обновляем
                     console.log(self.notes());
@@ -168,22 +172,32 @@ function NotesViewModel() {
                             //todo обновить аналогично остальные поля.
 
                             console.log(self.notes()[i]);
+
                             break;
                         }
                     }
-                }
 
+                }
                 //обновляем (очищаем) форму
                 self.cleanForm();
-            }
+
+            },
+            error: function (data) {
+                            alert("error! " + data.error);
+                            console.log('error! Не могу Сохранить данные');
+                            console.log(data);
+                        }
             //todo обработка ошибок от сервера
         });
-    };
+        console.log(self.notes());
+
+    }
 
 
     //вызов первоначальной загрузки данных от сервера.
     self.load();
 }
+
 //создаем экземпляр ViewModel
 var notesViewModel = new NotesViewModel();
 //Запускаем Knockout.JS. Организовываем связывание Model с View через ViewModel
